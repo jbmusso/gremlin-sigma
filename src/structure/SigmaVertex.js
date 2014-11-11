@@ -58,6 +58,7 @@ SigmaVertex.prototype.addEdge = function(label, vertex, keyValues) {
   var baseGraph = this.graph.getBaseGraph();
   var sigmaEdge = {
     id: keyValues && keyValues.id, //todo: improve edge id allocation
+    _label: label,
     source: this.baseElement.id,
     target: vertex.baseElement.id
   };

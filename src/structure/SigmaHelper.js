@@ -91,57 +91,50 @@ SigmaHelper.getEdgesFromVertex = function(vertex, direction, branchFactor, label
   var baseEdges = baseGraph.edges();
 
   var edges = new MultiIterator();
-  var outEdges;
-  var inEdges;
   var iterator;
   var baseVertexId = vertex.baseElement.id;
+  var chain;
 
   if (direction === 'out' || direction === 'both') {
+    var outEdges = baseGraph.internals().outNeighborsIndex[baseVertexId];
+
+    // TODO: improve performance, do the following lazily
+    chain = _.chain(Object.values(outEdges))
+      .map(function(node) { return Object.values(node); })
+      .flatten();
+
     if (labels.length > 0) {
-      labels.forEach(function(label) {
-        outEdges = vertex.outEdges.get(label) || new Set();
-        edges.addIterator(outEdges.values());
+      chain = chain.filter(function(edge) {
+        return labels.indexOf(edge._label) >= 0;
       });
-    } else {
-      outEdges = baseGraph.internals().outNeighborsIndex[baseVertexId];
-
-      // TODO: improve performance, do the following lazily
-      iterator = _.chain(Object.values(outEdges))
-        .map(function(node) { return Object.values(node); })
-        .flatten()
-        .map(function(edge) {
-          edge = new SigmaEdge(edge, vertex.graph);
-          return edge;
-        })
-        .value()
-        .values(); // ES6 iterator
-
-      return iterator;
     }
+
+    chain = chain.map(function(edge) {
+      return new SigmaEdge(edge, vertex.graph);
+    });
+
+    return chain.value().values(); // Get _.chain value then ES6 iterator
   }
 
   if (direction === 'in' || direction === 'both') {
+    var inEdges = baseGraph.internals().inNeighborsIndex[baseVertexId];
+
+    // TODO: improve performance, do the following lazily
+    chain = _.chain(Object.values(inEdges))
+      .map(function(node) { return Object.values(node); })
+      .flatten();
+
     if (labels.length > 0) {
-      labels.forEach(function(label) {
-        inEdges = vertex.inEdges.get(label) || new Set();
-        edges.addIterator(inEdges.values());
+      chain = chain.filter(function(edge) {
+        return labels.indexOf(edge._label) >= 0;
       });
-    } else {
-      inEdges = baseGraph.internals().inNeighborsIndex[baseVertexId];
-
-      // TODO: improve performance, do the following lazily
-      iterator = _.chain(Object.values(inEdges))
-        .map(function(node) { return Object.values(node); })
-        .flatten()
-        .map(function(edge) {
-          edge = new SigmaEdge(edge, vertex.graph);
-          return edge;
-        })
-        .value()
-        .values(); // ES6 iterator
-
-      return iterator;
     }
+
+    chain = chain.map(function(edge) {
+      return new SigmaEdge(edge, vertex.graph);
+    });
+
+    return chain.value().values(); // Get _.chain value then ES6 iterator
   }
 
   return new SigmaEdgeIterator(edges, branchFactor);
