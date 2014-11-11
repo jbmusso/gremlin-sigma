@@ -1,4 +1,5 @@
 require('es6-shim');
+var _ = require('underscore');
 
 var MultiIterator = require('gremlin-core-js/src/process/util/multiiterator');
 
@@ -76,6 +77,12 @@ SigmaHelper.getEdges = function(structure, direction, branchFactor, labels) {
   }
 };
 
+/**
+ * Returns an edge iterator for a given vertex, with edges being filtered by
+ * direction and/or labels.
+ *
+ * @return {Iterator}
+ */
 SigmaHelper.getEdgesFromVertex = function(vertex, direction, branchFactor, labels) { // JS specific method
   var SigmaEdge = require('./SigmaEdge');
   // console.log(arguments);
@@ -87,6 +94,7 @@ SigmaHelper.getEdgesFromVertex = function(vertex, direction, branchFactor, label
   var outEdges;
   var inEdges;
   var iterator;
+  var baseVertexId = vertex.baseElement.id;
 
   if (direction === 'out' || direction === 'both') {
     if (labels.length > 0) {
@@ -95,15 +103,18 @@ SigmaHelper.getEdgesFromVertex = function(vertex, direction, branchFactor, label
         edges.addIterator(outEdges.values());
       });
     } else {
-      //todo: improve performance, do the following lazily
-      iterator = baseEdges.filter(function(edge) {
-        return (edge.source === baseElement.id);
-      })
-      .map(function(edge) {
-        edge = new SigmaEdge(edge, vertex.graph);
-        return edge;
-      })
-      .values(); // ES6, returns an iterator
+      outEdges = baseGraph.internals().outNeighborsIndex[baseVertexId];
+
+      // TODO: improve performance, do the following lazily
+      iterator = _.chain(Object.values(outEdges))
+        .map(function(node) { return Object.values(node); })
+        .flatten()
+        .map(function(edge) {
+          edge = new SigmaEdge(edge, vertex.graph);
+          return edge;
+        })
+        .value()
+        .values(); // ES6 iterator
 
       return iterator;
     }
@@ -116,15 +127,18 @@ SigmaHelper.getEdgesFromVertex = function(vertex, direction, branchFactor, label
         edges.addIterator(inEdges.values());
       });
     } else {
-      //todo: improve performance, do the following lazily
-      iterator = baseEdges.filter(function(edge) {
-        return (edge.target === baseElement.id);
-      })
-      .map(function(edge) {
-        edge = new SigmaEdge(edge, vertex.graph);
-        return edge;
-      })
-      .values(); // ES6, returns an iterator
+      inEdges = baseGraph.internals().inNeighborsIndex[baseVertexId];
+
+      // TODO: improve performance, do the following lazily
+      iterator = _.chain(Object.values(inEdges))
+        .map(function(node) { return Object.values(node); })
+        .flatten()
+        .map(function(edge) {
+          edge = new SigmaEdge(edge, vertex.graph);
+          return edge;
+        })
+        .value()
+        .values(); // ES6 iterator
 
       return iterator;
     }
