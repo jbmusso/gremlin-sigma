@@ -13,15 +13,23 @@ var SigmaVertex = require('./SigmaVertex');
 var SigmaGraphTraversal = require('../process/graph/SigmaGraphTraversal');
 
 
-function SigmaGraph(sigmaGraph) {
-  this.sigmaGraph = sigmaGraph;
+function SigmaGraph(sigma) {
+  // Attach Sigma.js internal veriables to the base graph instance
+  sigma.classes.graph.addMethod('internals', function() {
+    return this;
+  });
+
+  var s = new sigma();
+  this.sigmaGraph = s.graph;
   this.currentId = 0;
 }
 
 inherits(SigmaGraph, Graph);
 
-SigmaGraph.open = function(sigmaGraph) {
-  return new SigmaGraph(sigmaGraph);
+SigmaGraph.open = function(sigma) {
+  var graph = new SigmaGraph(sigma);
+
+  return graph;
 };
 
 

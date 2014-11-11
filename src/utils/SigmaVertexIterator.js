@@ -8,31 +8,24 @@ SigmaVertexIterator.prototype.next = function() {
   var SigmaVertex = require('../structure/SigmaVertex');
 
   var next = this.edges.next();
-  var nextEdge = next.value;
-  var vertexId;
-  var vertex;
-  var node;
-
   if (next.done) {
     return next; // exit
   }
 
+  var nextEdge = next.value;
   var graph = nextEdge.graph;
   var baseGraph = graph.getBaseGraph();
+  var baseElement = nextEdge.baseElement;
+  var vertexId;
 
   if (this.direction === "in") {
-    vertexId = nextEdge.baseElement.source;
+    vertexId = baseElement.source;
   } else {
-    vertexId = nextEdge.baseElement.target;
+    vertexId = baseElement.target;
   }
 
-  // This is O(|V|) and should be improved with indices
-  // This could be moved to SigmaHelper
-  node = baseGraph.nodes().filter(function(node) {
-    return node.id === vertexId;
-  })[0];
-
-  vertex = new SigmaVertex(node, graph);
+  var sigmaNode = baseGraph.internals().nodesIndex[vertexId];
+  var vertex = new SigmaVertex(sigmaNode, graph);
   var ret = { value: vertex, done: false };
 
   return ret;
