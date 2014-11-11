@@ -19,8 +19,8 @@ function SigmaGraph(sigma) {
     return this;
   });
 
-  var s = new sigma();
-  this.sigmaGraph = s.graph;
+  this.s = new sigma();
+  this.sigmaGraph = this.s.graph;
   this.currentId = 0;
 }
 

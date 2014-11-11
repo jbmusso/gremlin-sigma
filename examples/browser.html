@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Gremlin Sigma example</title>
+    <style>
+      #graph-container {
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        position: absolute;
+      }
+    </style>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="../node_modules/sigma/build/sigma.min.js"></script>
+    <script type="text/javascript" src="../build/gremlin-sigma.js"></script>
+
+    <script type="text/javascript">
+
+    $(function() {
+      var g = GremlinSigma.SigmaGraph.open(sigma);
+
+      var gremlinSigma = g.addVertex(
+        'id', 'n0',
+        'label', 'GremlinSigma',
+        'x', Math.random(),
+        'y', Math.random(),
+        'size', 1,
+        'color', '#666');
+
+      var sigmaJs = g.addVertex(
+        'id', 'n1',
+        'label', 'Sigma.js',
+        'x', Math.random(),
+        'y', Math.random(),
+        'size', 1,
+        'color', '#666');
+
+      gremlinSigma.addEdge('uses', sigmaJs, { id: 'e0' });
+
+      g.s.addRenderer({
+        type: 'webgl',
+        container: document.getElementById('graph-container')
+      });
+
+      g.s.refresh();
+    });
+    </script>
+  </head>
+
+  <body>
+    <div id="graph-container"></div>
+  </body>
+</html>
